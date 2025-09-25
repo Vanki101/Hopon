@@ -1,0 +1,7 @@
+com\hopon\domain\Leg.class
+com\hopon\domain\Mode.class
+com\hopon\provider\RouteProvider.class
+com\hopon\domain\Place.class
+com\hopon\domain\Itinerary.class
+com\hopon\domain\TripRequest.class
+com\hopon\HopOnApplication.class
