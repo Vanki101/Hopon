@@ -2,6 +2,9 @@ com\hopon\domain\Leg.class
 com\hopon\domain\Mode.class
 com\hopon\provider\RouteProvider.class
 com\hopon\domain\Place.class
+com\hopon\api\TripSearchController.class
 com\hopon\domain\Itinerary.class
+com\hopon\provider\MockRouteProvider.class
+com\hopon\service\RouteSearchService.class
 com\hopon\domain\TripRequest.class
 com\hopon\HopOnApplication.class
