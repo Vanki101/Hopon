@@ -1,2 +1,0 @@
-# Hopon
-Kollektivapp prosjekt
