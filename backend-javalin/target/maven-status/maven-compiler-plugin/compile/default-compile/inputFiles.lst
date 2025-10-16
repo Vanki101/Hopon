@@ -1,0 +1,8 @@
+C:\Users\samii\HopOn\backend-javalin\src\main\java\com\hopon\adapter\entur\EnturClient.java
+C:\Users\samii\HopOn\backend-javalin\src\main\java\com\hopon\App\App.java
+C:\Users\samii\HopOn\backend-javalin\src\main\java\com\hopon\Core\model\Departure.java
+C:\Users\samii\HopOn\backend-javalin\src\main\java\com\hopon\Core\ports\DepartureFetcher.java
+C:\Users\samii\HopOn\backend-javalin\src\main\java\com\hopon\Core\ports\FavoriteRepository.java
+C:\Users\samii\HopOn\backend-javalin\src\main\java\com\hopon\Core\repository\InMemoryFavoriteRepository.java
+C:\Users\samii\HopOn\backend-javalin\src\main\java\com\hopon\Core\service\DepartureService.java
+C:\Users\samii\HopOn\backend-javalin\src\main\java\com\hopon\Core\service\FavoriteService.java

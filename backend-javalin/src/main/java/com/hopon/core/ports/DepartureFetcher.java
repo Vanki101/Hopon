@@ -1,8 +1,8 @@
-package com.hopon.core.ports;
+package com.hopon.Core.ports;
 
-import com.hopon.core.model.Departure;
+import com.hopon.Core.model.Departure;
 import java.util.List;
 
 public interface DepartureFetcher {
-    List<Departure> fetchDepartures(String stopPlaceId);
+    List<Departure> fetchDepartures(String stopId);
 }
