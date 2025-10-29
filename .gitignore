@@ -1,18 +1,131 @@
-# Build and Release Folders
-bin-debug/
-bin-release/
-[Oo]bj/
-[Bb]in/
+# ====================================
+# JAVA / MAVEN
+# ====================================
 
-# Other files and folders
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# ====================================
+# IDE / EDITOR
+# ====================================
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Eclipse
+.classpath
+.project
 .settings/
+bin/
 
-# Executables
-*.swf
-*.air
-*.ipa
-*.apk
+# VS Code
+.vscode/
+*.code-workspace
 
-# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
-# should NOT be excluded as they contain compiler settings and other important
-# information for Eclipse / Flash Builder.
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ====================================
+# FRONTEND (hvis dere har React/Node)
+# ====================================
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+.next/
+.nuxt/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ====================================
+# OPERATING SYSTEM
+# ====================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# ====================================
+# TEMP FILES
+# ====================================
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# ====================================
+# DATABASE (hvis dere har lokal DB)
+# ====================================
+
+*.db
+*.sqlite
+*.sqlite3
+
+# ====================================
+# SECRETS (VIKTIG!)
+# ====================================
+
+# API keys and secrets
+secrets.properties
+application-secrets.yml
+*.key
+*.pem
+credentials.json
