@@ -9,17 +9,19 @@ public class InMemoryFavoriteRepository implements FavoriteRepository {
     private final List<String> favorites = new ArrayList<>();
 
     @Override
-    public void addFavorite(String stopId) {
-        favorites.add(stopId);
-    }
-
-    @Override
-    public void removeFavorite(String stopId) {
-        favorites.remove(stopId);
-    }
-
-    @Override
-    public List<String> getFavorites() {
+    public List<String> findAll() {
         return new ArrayList<>(favorites);
+    }
+
+    @Override
+    public void add(String stopId) {
+        if (!favorites.contains(stopId)) {
+            favorites.add(stopId);
+        }
+    }
+
+    @Override
+    public void remove(String stopId) {
+        favorites.remove(stopId);
     }
 }

@@ -32,7 +32,7 @@ public class Departure {
         return departureTime;
     }
 
-    // Disse to gir deg pent formatert dato og tid i JSON
+    // gir pent formatert dato og tid i JSON
     public String getDate() {
         return departureTime.toLocalDate().toString();
     }

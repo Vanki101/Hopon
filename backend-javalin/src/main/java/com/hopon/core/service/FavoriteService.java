@@ -1,27 +1,50 @@
 package com.hopon.Core.service;
 
 import com.hopon.Core.ports.FavoriteRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 public class FavoriteService {
-    private final FavoriteRepository repo;
 
-    public FavoriteService(FavoriteRepository repo) {
-        this.repo = repo;
-    }
+    private static final Logger log = LoggerFactory.getLogger(FavoriteService.class);
 
-    public void add(String stopId) {
-        if (stopId == null || stopId.isBlank()) {
-            throw new IllegalArgumentException("Stop ID cannot be empty");
-        }
-        repo.addFavorite(stopId);
-    }
+    private final FavoriteRepository repository;
 
-    public void remove(String stopId) {
-        repo.removeFavorite(stopId);
+    public FavoriteService(FavoriteRepository repository) {
+        this.repository = repository;
     }
 
     public List<String> getAll() {
-        return repo.getFavorites();
+        log.info("Retrieving all favorites");
+        try {
+            var favorites = repository.findAll();
+            log.debug("Found {} favorites", favorites.size());
+            return favorites;
+        } catch (Exception e) {
+            log.error("Error retrieving favorites: {}", e.getMessage(), e);
+            return List.of();
+        }
+    }
+
+    public void add(String stopId) {
+        log.info("Adding favorite stopId={}", stopId);
+        try {
+            repository.add(stopId);
+            log.debug("Favorite added successfully: {}", stopId);
+        } catch (Exception e) {
+            log.error("Error adding favorite stopId={}: {}", stopId, e.getMessage(), e);
+        }
+    }
+
+    public void remove(String stopId) {
+        log.info("Removing favorite stopId={}", stopId);
+        try {
+            repository.remove(stopId);
+            log.debug("Favorite removed successfully: {}", stopId);
+        } catch (Exception e) {
+            log.error("Error removing favorite stopId={}: {}", stopId, e.getMessage(), e);
+        }
     }
 }

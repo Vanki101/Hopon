@@ -5,19 +5,21 @@ import com.hopon.Core.model.Departure;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EnturClient implements DepartureFetcher {
 
+    private static final Logger log = LoggerFactory.getLogger(EnturClient.class); // LOG:
     private static final String ENTUR_URL = "https://api.entur.io/journey-planner/v3/graphql";
     private final HttpClient client = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
@@ -25,7 +27,6 @@ public class EnturClient implements DepartureFetcher {
     @Override
     public List<Departure> fetchDepartures(String stopPlaceId) {
         try {
-            //  GraphQL-query på én linje
             String query = String.format(
                 "{ stopPlace(id: \"%s\") { name estimatedCalls(timeRange: 7200, numberOfDepartures: 5) { expectedDepartureTime destinationDisplay { frontText } serviceJourney { line { publicCode } } } } }",
                 stopPlaceId
@@ -40,14 +41,16 @@ public class EnturClient implements DepartureFetcher {
                     .POST(HttpRequest.BodyPublishers.ofString(body))
                     .build();
 
+            log.info("Fetching departures for stopPlaceId={}", stopPlaceId); // LOG:
+
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            System.out.println(" FULL ENTUR-RESPONS: " + response.body());
+            log.debug("Entur API response: {}", response.body()); // LOG:
 
             return parseDepartures(response.body());
 
         } catch (Exception e) {
-            System.err.println(" Feil ved henting av Entur-data: " + e.getMessage());
+            log.error("Error while fetching Entur data for stopPlaceId={}: {}", stopPlaceId, e.getMessage(), e); // LOG:
             return List.of();
         }
     }
@@ -60,7 +63,7 @@ public class EnturClient implements DepartureFetcher {
             JsonNode stopPlace = root.path("data").path("stopPlace");
 
             if (stopPlace.isMissingNode()) {
-                System.err.println(" Ingen stopPlace funnet i responsen!");
+                log.warn("No stopPlace found in Entur response"); // LOG:
                 return departures;
             }
 
@@ -68,7 +71,7 @@ public class EnturClient implements DepartureFetcher {
             JsonNode calls = stopPlace.path("estimatedCalls");
 
             if (!calls.isArray()) {
-                System.err.println(" Ingen estimatedCalls-liste funnet!");
+                log.warn("No estimatedCalls list found in Entur response"); // LOG:
                 return departures;
             }
 
@@ -79,20 +82,17 @@ public class EnturClient implements DepartureFetcher {
 
                 if (line.isEmpty() || to.isEmpty() || time.isEmpty()) continue;
 
-                LocalDateTime departureTime = OffsetDateTime.parse(time)
-                        .toLocalDateTime();
-
+                LocalDateTime departureTime = OffsetDateTime.parse(time).toLocalDateTime();
                 departures.add(new Departure(fromName, to, line, departureTime));
-
             }
 
             if (departures.isEmpty()) {
                 departures.add(new Departure("Ukjent", "Ingen avganger", "L0", LocalDateTime.now()));
-                System.out.println(" Ingen reelle avganger – viser dummy-data i stedet.");
+                log.info("No real departures – using fallback dummy data"); // LOG:
             }
 
         } catch (Exception e) {
-            System.err.println("Feil ved parsing av Entur-data: " + e.getMessage());
+            log.error("Error parsing Entur JSON response: {}", e.getMessage(), e); // LOG:
         }
 
         return departures;
