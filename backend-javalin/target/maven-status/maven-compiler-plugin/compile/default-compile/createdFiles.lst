@@ -1,8 +1,1 @@
-com\hopon\Core\service\FavoriteService.class
-com\hopon\Core\service\DepartureService.class
-com\hopon\Core\repository\InMemoryFavoriteRepository.class
-com\hopon\Core\ports\DepartureFetcher.class
-com\hopon\Core\model\Departure.class
-com\hopon\App\App.class
-com\hopon\adapter\entur\EnturClient.class
-com\hopon\Core\ports\FavoriteRepository.class
+
