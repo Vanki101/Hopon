@@ -18,6 +18,7 @@
           @clear="handleClear"
         />
 
+
         <!-- Debug info -->
         <div v-if="searchQuery" class="debug-box">
           <h3>Debug Info</h3>
@@ -36,6 +37,17 @@
         <TripList :trips="tripMock" @select="t => console.log('Valgt reise:', t)" />
       </section>
 
+      <section style="margin-top:24px; padding-top:12px; border-top:1px solid #eee;">
+          <h2 style="font-size:20px; font-weight:600; margin:0 0 12px;">Button – demo</h2>
+          <Button variant="primary" @click="() => console.log('Primary button clicked')">Primary Button</Button>
+          <Button variant="secondary" @click="() => console.log('Secondary button clicked')" style="margin-left:12px;">Secondary Button</Button>
+          <Button variant="danger" @click="() => console.log('Danger button clicked')" style="margin-left:12px;">Danger Button</Button>
+      </section>
+
+      <section style="margin-top:24px; padding-top:12px; border-top:1px solid #eee;">
+        <h2 style="font-size:20px; font-weight:600; margin:0 0 12px;">Favoritelist – demo</h2>
+        <Favoritelist />
+      </section>
     </main>
   </div>
 </template>
@@ -44,6 +56,8 @@
 import { ref } from 'vue'
 import SearchBar from './components/SearchBar.vue'
 import TripList from './components/TripList.vue'
+import Button from './components/ui/Button.vue'
+import Favoritelist from './components/Favoritelist.vue'
 
 // State
 const searchQuery = ref('')

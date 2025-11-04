@@ -135,7 +135,7 @@ const handleBlur = () => {
   setTimeout(() => {
     isFocused.value = false
     showSuggestions.value = false
-  }, 200)
+  }, 2000)
 }
 
 // Watch for external changes
