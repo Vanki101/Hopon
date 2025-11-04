@@ -1,30 +1,177 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div id="app">
+    <header class="app-header">
+      <h1>SearchBar </h1>
+      <p>Testing Issue #35 - SearchBar komponent</p>
+    </header>
+
+    <main class="app-main">
+      <div class="test-section">
+        <h2> SearchBar</h2>
+        
+        <SearchBar
+          v-model="searchQuery"
+          placeholder="Søk etter holdeplass..."
+          :suggestions="suggestions"
+          :isLoading="isSearching"
+          @search="handleSearch"
+          @clear="handleClear"
+        />
+
+        <!-- Debug info -->
+        <div v-if="searchQuery" class="debug-box">
+          <h3>Debug Info</h3>
+          <p><strong>Søkeord:</strong> {{ searchQuery }}</p>
+          <p><strong>Antall forslag:</strong> {{ suggestions.length }}</p>
+        </div>
+
+        <div v-else class="hint-box">
+          <p>💡 Skriv noe i søkefeltet for å se forslag</p>
+        </div>
+      </div>
+    </main>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
+<script setup>
+import { ref } from 'vue'
+import SearchBar from './components/SearchBar.vue'
+
+// State
+const searchQuery = ref('')
+const isSearching = ref(false)
+
+// Mock suggestions - simulerer Entur API
+const allSuggestions = [
+  'Oslo S',
+  'Nationaltheatret',
+  'Majorstuen',
+  'Stortinget',
+  'Jernbanetorget',
+  'Grønland',
+  'Tøyen',
+  'Carl Berners plass',
+  'Sinsen',
+  'Storo'
+]
+
+const suggestions = ref([])
+
+// Methods
+const handleSearch = (query) => {
+  console.log(' Søker etter:', query)
+  
+  isSearching.value = true
+  
+  // Simuler API-kall med delay
+  setTimeout(() => {
+    if (query) {
+      // Filter suggestions basert på søk
+      suggestions.value = allSuggestions.filter(s => 
+        s.toLowerCase().includes(query.toLowerCase())
+      )
+      console.log(' Fant', suggestions.value.length, 'forslag')
+    } else {
+      suggestions.value = []
+    }
+    
+    isSearching.value = false
+  }, 300)
+}
+
+const handleClear = () => {
+  console.log(' Søket ble tømt')
+  searchQuery.value = ''
+  suggestions.value = []
+}
+</script>
+
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+.app-header {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #ee2222 100%);
+  color: white;
+  padding: var(--spacing-xl);
+  text-align: center;
+  box-shadow: var(--shadow-lg);
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+.app-header h1 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.app-header p {
+  font-size: var(--font-size-base);
+  opacity: 0.9;
+}
+
+.app-main {
+  flex: 1;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+.test-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.test-section h2 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-gray-900);
+}
+
+.debug-box {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background-color: var(--color-gray-100);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--color-primary);
+}
+
+.debug-box h3 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-gray-900);
+}
+
+.debug-box p {
+  font-size: var(--font-size-base);
+  color: var(--color-secondary);
+  margin: var(--spacing-xs) 0;
+}
+
+.hint-box {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background-color: #fef3c7;
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--color-accent);
+  text-align: center;
+}
+
+.hint-box p {
+  color: #000000;
+  font-size: var(--font-size-base);
+}
+
+/* media qurraies */
+@media (max-width: 768px) {
+  .app-main {
+    padding: var(--spacing-md);
+  }
+
+  .app-header h1 {
+    font-size: var(--font-size-xl);
+  }
 }
 </style>
