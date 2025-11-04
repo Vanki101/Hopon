@@ -29,6 +29,13 @@
           <p>💡 Skriv noe i søkefeltet for å se forslag</p>
         </div>
       </div>
+
+    
+      <section style="margin-top:24px; padding-top:12px; border-top:1px solid #eee;">
+        <h2 style="font-size:20px; font-weight:600; margin:0 0 12px;">TripList – demo</h2>
+        <TripList :trips="tripMock" @select="t => console.log('Valgt reise:', t)" />
+      </section>
+
     </main>
   </div>
 </template>
@@ -36,6 +43,7 @@
 <script setup>
 import { ref } from 'vue'
 import SearchBar from './components/SearchBar.vue'
+import TripList from './components/TripList.vue'
 
 // State
 const searchQuery = ref('')
@@ -56,6 +64,12 @@ const allSuggestions = [
 ]
 
 const suggestions = ref([])
+
+const tripMock = [                                        // ➕
+  { id:'t1', line:'3', from:'Halden', to:'Sarpsborg',  departureTime:'12:05', arrivalTime:'12:45', duration:40 },
+  { id:'t2', line:'7', from:'Halden', to:'Fredrikstad', departureTime:'13:10', arrivalTime:'13:50', duration:40 },
+]
+
 
 // Methods
 const handleSearch = (query) => {

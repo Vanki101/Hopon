@@ -54,7 +54,7 @@
           v-for="(suggestion, index) in suggestions"
           :key="index"
           @click="selectSuggestion(suggestion)"
-          @keypress.enter="selectSuggestion(suggestion)"
+          @keydown.enter="selectSuggestion(suggestion)"
           class="suggestion-item"
           role="option"
           :aria-selected="false"
