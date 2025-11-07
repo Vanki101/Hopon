@@ -1,0 +1,59 @@
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f7f9fb;
+  color: #1a1a1a;
+}
+
+h1, h2, h3 {
+  margin: 0;
+}
+
+
+.home {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 24px 0;
+  background: linear-gradient(90deg, #2EA3A3, #D46A1C);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.home-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.home-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.home-main {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.search-debug {
+  margin-top: 24px;
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.home-hint {
+  text-align: center;
+  color: #666;
+  font-size: 0.95rem;
+  margin-top: 20px;
+}

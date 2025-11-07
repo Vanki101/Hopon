@@ -1,205 +1,55 @@
 <template>
   <div id="app">
-    <header class="app-header">
-      <h1>SearchBar </h1>
-      <p>Testing Issue #35 - SearchBar komponent</p>
-    </header>
+    <!-- Enkel navigasjon for testing -->
+    <nav class="navbar">
+      <router-link to="/">Hjem</router-link>
+      <router-link to="/search">Søk</router-link>
+      <router-link to="/trip">Reiser</router-link>
+      <router-link to="/tickets">Billetter</router-link>
+      <router-link to="/settings">Innstillinger</router-link>
+    </nav>
 
-    <main class="app-main">
-      <div class="test-section">
-        <h2> SearchBar</h2>
-        
-        <SearchBar
-          v-model="searchQuery"
-          placeholder="Søk etter holdeplass..."
-          :suggestions="suggestions"
-          :isLoading="isSearching"
-          @search="handleSearch"
-          @clear="handleClear"
-        />
-
-
-        <!-- Debug info -->
-        <div v-if="searchQuery" class="debug-box">
-          <h3>Debug Info</h3>
-          <p><strong>Søkeord:</strong> {{ searchQuery }}</p>
-          <p><strong>Antall forslag:</strong> {{ suggestions.length }}</p>
-        </div>
-
-        <div v-else class="hint-box">
-          <p>💡 Skriv noe i søkefeltet for å se forslag</p>
-        </div>
-      </div>
-
-    
-      <section style="margin-top:24px; padding-top:12px; border-top:1px solid #eee;">
-        <h2 style="font-size:20px; font-weight:600; margin:0 0 12px;">TripList – demo</h2>
-        <TripList :trips="tripMock" @select="t => console.log('Valgt reise:', t)" />
-      </section>
-
-      <section style="margin-top:24px; padding-top:12px; border-top:1px solid #eee;">
-          <h2 style="font-size:20px; font-weight:600; margin:0 0 12px;">Button – demo</h2>
-          <Button variant="primary" @click="() => console.log('Primary button clicked')">Primary Button</Button>
-          <Button variant="secondary" @click="() => console.log('Secondary button clicked')" style="margin-left:12px;">Secondary Button</Button>
-          <Button variant="danger" @click="() => console.log('Danger button clicked')" style="margin-left:12px;">Danger Button</Button>
-      </section>
-
-      <section style="margin-top:24px; padding-top:12px; border-top:1px solid #eee;">
-        <h2 style="font-size:20px; font-weight:600; margin:0 0 12px;">Favoritelist – demo</h2>
-        <Favoritelist />
-      </section>
+    <!-- Her vises views basert på rute -->
+    <main class="main-content">
+      <router-view />
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import SearchBar from './components/SearchBar.vue'
-import TripList from './components/TripList.vue'
-import Button from './components/ui/Button.vue'
-import Favoritelist from './components/Favoritelist.vue'
-
-// State
-const searchQuery = ref('')
-const isSearching = ref(false)
-
-// Mock suggestions - simulerer Entur API
-const allSuggestions = [
-  'Oslo S',
-  'Nationaltheatret',
-  'Majorstuen',
-  'Stortinget',
-  'Jernbanetorget',
-  'Grønland',
-  'Tøyen',
-  'Carl Berners plass',
-  'Sinsen',
-  'Storo'
-]
-
-const suggestions = ref([])
-
-const tripMock = [                                        // ➕
-  { id:'t1', line:'3', from:'Halden', to:'Sarpsborg',  departureTime:'12:05', arrivalTime:'12:45', duration:40 },
-  { id:'t2', line:'7', from:'Halden', to:'Fredrikstad', departureTime:'13:10', arrivalTime:'13:50', duration:40 },
-]
-
-
-// Methods
-const handleSearch = (query) => {
-  console.log(' Søker etter:', query)
-  
-  isSearching.value = true
-  
-  // Simuler API-kall med delay
-  setTimeout(() => {
-    if (query) {
-      // Filter suggestions basert på søk
-      suggestions.value = allSuggestions.filter(s => 
-        s.toLowerCase().includes(query.toLowerCase())
-      )
-      console.log(' Fant', suggestions.value.length, 'forslag')
-    } else {
-      suggestions.value = []
-    }
-    
-    isSearching.value = false
-  }, 300)
-}
-
-const handleClear = () => {
-  console.log(' Søket ble tømt')
-  searchQuery.value = ''
-  suggestions.value = []
-}
+// Ingen logikk her — alt håndteres i views
 </script>
 
 <style scoped>
 #app {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 }
 
-.app-header {
-  background: linear-gradient(135deg, var(--color-primary) 0%, #ee2222 100%);
-  color: white;
-  padding: var(--spacing-xl);
-  text-align: center;
-  box-shadow: var(--shadow-lg);
-}
-
-.app-header h1 {
-  font-size: var(--font-size-2xl);
-  margin-bottom: var(--spacing-sm);
-}
-
-.app-header p {
-  font-size: var(--font-size-base);
-  opacity: 0.9;
-}
-
-.app-main {
-  flex: 1;
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
-  padding: var(--spacing-xl);
-}
-
-.test-section {
-  margin-bottom: var(--spacing-xl);
-}
-
-.test-section h2 {
-  font-size: var(--font-size-xl);
+/* Enkel navigasjonsmeny (kan styles i style.css senere) */
+.navbar {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  background: linear-gradient(90deg, #2EA3A3, #D46A1C);
+  padding: 16px 0;
   font-weight: 600;
-  margin-bottom: var(--spacing-lg);
-  color: var(--color-gray-900);
 }
 
-.debug-box {
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-lg);
-  background-color: var(--color-gray-100);
-  border-radius: var(--border-radius);
-  border-left: 4px solid var(--color-primary);
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  transition: opacity 0.2s ease;
 }
 
-.debug-box h3 {
-  font-size: var(--font-size-lg);
-  margin-bottom: var(--spacing-sm);
-  color: var(--color-gray-900);
+.navbar a:hover {
+  opacity: 0.8;
 }
 
-.debug-box p {
-  font-size: var(--font-size-base);
-  color: var(--color-secondary);
-  margin: var(--spacing-xs) 0;
-}
-
-.hint-box {
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-lg);
-  background-color: #fef3c7;
-  border-radius: var(--border-radius);
-  border-left: 4px solid var(--color-accent);
-  text-align: center;
-}
-
-.hint-box p {
-  color: #000000;
-  font-size: var(--font-size-base);
-}
-
-/* media qurraies */
-@media (max-width: 768px) {
-  .app-main {
-    padding: var(--spacing-md);
-  }
-
-  .app-header h1 {
-    font-size: var(--font-size-xl);
-  }
+.main-content {
+  flex: 1;
+  padding: 24px;
 }
 </style>

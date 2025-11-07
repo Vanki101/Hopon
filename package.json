@@ -4,6 +4,7 @@
     "@tanstack/react-router": "^1.134.9",
     "axios": "^1.13.1",
     "lucide-react": "^0.552.0",
+    "vue-router": "^4.6.3",
     "zod": "^4.1.12",
     "zustand": "^5.0.8"
   },

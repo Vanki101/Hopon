@@ -1,16 +1,16 @@
 <template>
-  <section class="tickets">
-    <h1>Billetter</h1>
-    <p>Her kan du se dine kjøpte billetter og tilgjengelige reiser.</p>
+  <section class="search">
+    <h1>Søk etter reiser</h1>
+    <p>Her kan du søke etter holdeplasser, adresser og planlagte ruter.</p>
   </section>
 </template>
 
 <script setup>
-// Her kan du senere hente billetter fra API eller localStorage
+// Her kan du senere importere SearchBar-komponenten og håndtere søk
 </script>
 
 <style scoped>
-.tickets {
+.search {
   max-width: 700px;
   margin: 60px auto;
   padding: 20px;
@@ -19,13 +19,13 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.tickets h1 {
+.search h1 {
   font-size: 24px;
-  color: #D46A1C;
+  color: #2EA3A3;
   margin-bottom: 12px;
 }
 
-.tickets p {
+.search p {
   color: #444;
   font-size: 16px;
 }
