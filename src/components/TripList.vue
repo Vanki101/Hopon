@@ -1,76 +1,125 @@
 <template>
-  <section class="trip-list">
-    <div v-if="loading" class="state">Laster reiseforslag…</div>
-    <div v-else-if="error" class="state error">⚠️ {{ error }}</div>
-    <div v-else-if="!trips.length" class="state">Ingen reiser funnet.</div>
+  <div class="trip-list">
+    <div
+      v-for="trip in trips"
+      :key="trip.id"
+      class="trip-item"
+      tabindex="0"
+      role="button"
+      @click="$emit('select', trip)" 
+      @keydown.enter="$emit('select', trip)"
+    >
+      <!-- Linje-nummer -->
+      <div class="trip-line">
+        <span class="line-number">{{ trip.line }}</span>
+      </div>
 
-    <ul v-else class="list">
-      <li
-        v-for="t in trips"
-        :key="t.id"
-        class="item"
-        tabindex="0"
-        @click="$emit('select', t)"
-        @keydown.enter.prevent="$emit('select', t)"
-      >
-        <span class="badge">{{ t.line }}</span>
-        <div class="meta">
-          <div class="route">{{ t.from }} → {{ t.to }}</div>
-          <div class="time">Avgang {{ t.departureTime }} · Ankomst {{ t.arrivalTime }} ({{ t.duration }} min)</div>
-        </div>
-        <div v-if="t.price" class="price">{{ t.price }} kr</div>
-      </li>
-    </ul>
-  </section>
+      <!-- Info -->
+      <div class="trip-info">
+        <h3 class="trip-route">{{ trip.from }} → {{ trip.to }}</h3>
+        <p class="trip-time">
+          Avgang {{ trip.departureTime }} · Ankomst {{ trip.arrivalTime }} ({{ trip.duration }} min)
+        </p>
+      </div>
+
+      <!-- Pris -->
+      <div class="trip-price">
+        <span>{{ trip.price }} kr</span>
+      </div>
+    </div>
+  </div>
 </template>
 
-<script setup lang="ts">
-export interface TripItem {
-  id: string
-  line: string
-  from: string
-  to: string
-  departureTime: string
-  arrivalTime: string
-  duration: number
-  price?: number
-}
-
-withDefaults(defineProps<{
-  trips: TripItem[]
-  loading?: boolean
-  error?: string | null
-}>(), {
-  trips: () => [],
-  loading: false,
-  error: null,
+<script setup>
+defineProps({
+  trips: {
+    type: Array,
+    default: () => [],
+  },
 })
+defineEmits(['select'])
 </script>
 
 <style scoped>
-.trip-list { width: 100%; }
-.state { padding: 12px 0; color: #555; }
-.state.error { color: #b00020; }
-
-.list { list-style: none; margin: 0; padding: 0; border-top: 1px solid #eee; }
-.item {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+.trip-list {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
 }
-.item:hover, .item:focus { background: #f7f9fb; outline: none; }
 
-.badge {
-  min-width: 36px; text-align: center;
-  padding: 2px 8px; border-radius: 8px;
-  background: #e6f1f8; color: #0f4a6c; font-weight: 700; font-size: 12px;
+/* Hver reise */
+.trip-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9f9f9;
+  padding: 16px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  border: 1px solid #eee;
 }
-.meta { display: grid; gap: 4px; }
-.route { font-weight: 600; }
-.time { font-size: 13px; color: #666; }
-.price { font-weight: 700; }
+
+.trip-item:hover {
+  background-color: #fff3eb;
+  transform: translateY(-1px);
+}
+
+.trip-item:active {
+  transform: scale(0.99);
+}
+
+/* Linje */
+.trip-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e9f3f3;
+  color: #2ea3a3;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 14px;
+  min-width: 40px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+/* Info */
+.trip-info {
+  flex: 1;
+  margin-left: 16px;
+}
+
+.trip-route {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 4px;
+}
+
+.trip-time {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0;
+}
+
+/* Pris */
+.trip-price {
+  font-weight: 700;
+  color: #111;
+  font-size: 1rem;
+  margin-left: 12px;
+}
+
+/* Responsiv */
+@media (max-width: 600px) {
+  .trip-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .trip-price {
+    align-self: flex-end;
+    margin-top: 8px;
+  }
+}
 </style>
