@@ -1,6 +1,6 @@
-package com.hopon.Core.repository;
+package com.hopon.core.repository;
 
-import com.hopon.Core.ports.FavoriteRepository;
+import com.hopon.core.ports.FavoriteRepository;
 import java.util.ArrayList;
 import java.util.List;
 

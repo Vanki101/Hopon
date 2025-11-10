@@ -1,19 +1,23 @@
-package com.hopon.Core.model;
+package com.hopon.core.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Departure {
-    private String from;
-    private String to;
-    private String line;
-    private LocalDateTime departureTime;
 
-    public Departure(String from, String to, String line, LocalDateTime departureTime) {
+    private final String from;
+    private final String to;
+    private final String line;
+    private final LocalDateTime departureTime;
+    private final String transportMode;
+
+    public Departure(String from, String to, String line, LocalDateTime departureTime, String transportMode) {
         this.from = from;
         this.to = to;
         this.line = line;
         this.departureTime = departureTime;
+        this.transportMode = transportMode;
     }
 
     public String getFrom() {
@@ -32,13 +36,16 @@ public class Departure {
         return departureTime;
     }
 
-    // gir pent formatert dato og tid i JSON
-    public String getDate() {
-        return departureTime.toLocalDate().toString();
+    @JsonProperty("transportMode")  
+    public String getTransportMode() {
+        return transportMode;
     }
 
     public String getTime() {
-        return departureTime.toLocalTime()
-                .format(DateTimeFormatter.ofPattern("HH:mm"));
+        return departureTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+    }
+
+    public String getDate() {
+        return departureTime.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 }

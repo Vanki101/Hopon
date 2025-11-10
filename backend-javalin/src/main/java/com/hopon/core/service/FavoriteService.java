@@ -1,6 +1,6 @@
-package com.hopon.Core.service;
+package com.hopon.core.service;
 
-import com.hopon.Core.ports.FavoriteRepository;
+import com.hopon.core.ports.FavoriteRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
