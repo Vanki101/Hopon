@@ -96,7 +96,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.hopon.App.App</mainClass>
+                            <mainClass>com.hopon.app.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -117,7 +117,7 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.hopon.App.App</mainClass>
+                                    <mainClass>com.hopon.app.App</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -131,7 +131,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.6.2</version>
                 <configuration>
-                    <mainClass>com.hopon.App.App</mainClass>
+                    <mainClass>com.hopon.app.App</mainClass>
                 </configuration>
             </plugin>
         </plugins>

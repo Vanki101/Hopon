@@ -1,4 +1,4 @@
-package com.hopon.App;
+package com.hopon.app;
 
 import io.javalin.http.Context;
 import org.slf4j.Logger;

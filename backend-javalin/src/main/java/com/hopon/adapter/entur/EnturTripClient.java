@@ -2,6 +2,10 @@ package com.hopon.adapter.entur;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hopon.core.model.TripPattern;
+import com.hopon.core.model.Leg;
+import com.hopon.core.model.Line;
+import com.hopon.core.model.Place;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +17,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+
 public class EnturTripClient {
 
     private static final Logger log = LoggerFactory.getLogger(EnturTripClient.class);
@@ -22,8 +27,9 @@ public class EnturTripClient {
 
     /**
      * Planlegger reise mellom to StopPlace IDs
+     * Returnerer liste av TripPattern (ikke bare legs)
      */
-    public List<TripLeg> planTripByIds(String fromId, String toId) {
+    public List<TripPattern> planTripByIds(String fromId, String toId) {
         try {
             String dateTime = ZonedDateTime.now()
                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -89,94 +95,80 @@ public class EnturTripClient {
         }
     }
 
-    private List<TripLeg> parseTrips(String json) {
-        List<TripLeg> legs = new ArrayList<>();
+    private List<TripPattern> parseTrips(String json) {
+        List<TripPattern> tripPatterns = new ArrayList<>();
         try {
             JsonNode root = mapper.readTree(json);
             
             JsonNode errors = root.path("errors");
             if (errors.isArray() && errors.size() > 0) {
                 log.error("Entur API error: {}", errors.get(0).path("message").asText());
-                return legs;
+                return tripPatterns;
             }
 
             JsonNode patterns = root.path("data").path("trip").path("tripPatterns");
             
             if (patterns.isMissingNode() || patterns.isNull()) {
                 log.warn("No tripPatterns found in response");
-                return legs;
+                return tripPatterns;
             }
 
             if (!patterns.isArray() || patterns.size() == 0) {
                 log.warn("Empty tripPatterns array");
-                return legs;
+                return tripPatterns;
             }
 
             log.info("Found {} trip patterns", patterns.size());
 
             for (JsonNode pattern : patterns) {
-                for (JsonNode leg : pattern.path("legs")) {
-                    String mode = leg.path("mode").asText("UNKNOWN");
-                    String from = leg.path("fromPlace").path("name").asText("Unknown");
-                    String to = leg.path("toPlace").path("name").asText("Unknown");
-                    String line = leg.path("line").path("publicCode").asText("");
-                    String transportMode = leg.path("line").path("transportMode").asText(mode);
-                    double distance = leg.path("distance").asDouble(0);
-                    int duration = leg.path("duration").asInt(0);
-                    String startTime = leg.path("expectedStartTime").asText("");
-                    String endTime = leg.path("expectedEndTime").asText("");
+                String expectedStartTime = pattern.path("expectedStartTime").asText("");
+                String expectedEndTime = pattern.path("expectedEndTime").asText("");
+                int duration = pattern.path("duration").asInt(0);
+                double walkDistance = pattern.path("walkDistance").asDouble(0);
 
-                    legs.add(new TripLeg(from, to, mode, line, transportMode, distance, duration, startTime, endTime));
+                List<Leg> legs = new ArrayList<>();
+                for (JsonNode legNode : pattern.path("legs")) {
+                    String mode = legNode.path("mode").asText("UNKNOWN");
+                    double distance = legNode.path("distance").asDouble(0);
+                    int legDuration = legNode.path("duration").asInt(0);
+                    String legStartTime = legNode.path("expectedStartTime").asText("");
+                    String legEndTime = legNode.path("expectedEndTime").asText("");
+
+                    Line line = null;
+                    JsonNode lineNode = legNode.path("line");
+                    if (!lineNode.isMissingNode() && !lineNode.isNull()) {
+                        String lineId = lineNode.path("id").asText("");
+                        String publicCode = lineNode.path("publicCode").asText("");
+                        String transportMode = lineNode.path("transportMode").asText(mode);
+                        line = new Line(lineId, publicCode, transportMode);
+                    }
+
+                    Place fromPlace = null;
+                    JsonNode fromNode = legNode.path("fromPlace");
+                    if (!fromNode.isMissingNode() && !fromNode.isNull()) {
+                        fromPlace = new Place(fromNode.path("name").asText("Unknown"));
+                    }
+
+                    Place toPlace = null;
+                    JsonNode toNode = legNode.path("toPlace");
+                    if (!toNode.isMissingNode() && !toNode.isNull()) {
+                        toPlace = new Place(toNode.path("name").asText("Unknown"));
+                    }
+
+                    legs.add(new Leg(mode, distance, legDuration, legStartTime, legEndTime, 
+                                    line, fromPlace, toPlace));
                 }
+
+                tripPatterns.add(new TripPattern(expectedStartTime, expectedEndTime, 
+                                                 duration, walkDistance, legs));
             }
 
-            log.info("Returning {} trip legs total", legs.size());
+            log.info("Returning {} trip patterns", tripPatterns.size());
 
         } catch (Exception e) {
             log.error("Error parsing trip JSON: {}", e.getMessage(), e);
         }
 
-        return legs;
-    }
-
-    public static class TripLeg {
-        public final String from;
-        public final String to;
-        public final String mode;
-        public final String line;
-        public final String transportMode;
-        public final double distance;
-        public final int duration;
-        public final String startTime;
-        public final String endTime;
-
-        public TripLeg(String from, String to, String mode, String line, String transportMode,
-                       double distance, int duration, String startTime, String endTime) {
-            this.from = from;
-            this.to = to;
-            this.mode = mode;
-            this.line = line;
-            this.transportMode = transportMode;
-            this.distance = distance;
-            this.duration = duration;
-            this.startTime = startTime;
-            this.endTime = endTime;
-        }
-
-        public String getFrom() { return from; }
-        public String getTo() { return to; }
-        public String getMode() { return mode; }
-        public String getLine() { return line; }
-        public String getTransportMode() { return transportMode; }
-        public double getDistance() { return distance; }
-        public int getDuration() { return duration; }
-        public String getStartTime() { return startTime; }
-        public String getEndTime() { return endTime; }
-
-        @Override
-        public String toString() {
-            return String.format("%s -> %s [%s %s] %.0fm (%ds)", 
-                from, to, mode, line, distance, duration);
-        }
+        return tripPatterns;
     }
 }

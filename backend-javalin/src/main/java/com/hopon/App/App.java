@@ -1,16 +1,16 @@
-package com.hopon.App;
+package com.hopon.app;
 
 import io.javalin.Javalin;
 import io.javalin.json.JavalinJackson;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import com.hopon.adapter.entur.EnturTripClient; 
 import com.hopon.core.service.DepartureService;
 import com.hopon.adapter.entur.EnturClient;
 import com.hopon.adapter.entur.EnturLocationClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Map;
 
 public class App {
 
@@ -23,7 +23,14 @@ public class App {
         JavalinJackson jackson = new JavalinJackson(mapper);
 
         // ---- Start server ----
-        Javalin app = Javalin.create(config -> config.jsonMapper(jackson)).start(8080);
+        Javalin app = Javalin.create(config -> {
+            config.jsonMapper(jackson);
+            config.plugins.enableCors(cors -> {
+                cors.add(it -> {
+                    it.anyHost();
+                });
+            });
+        }).start(8080);
 
         // ---- Opprett tjenester ----
         var enturClient = new EnturClient();
@@ -99,12 +106,18 @@ public class App {
                 return;
             }
 
-            var trips = tripClient.planTripByIds(fromId, toId);
+            var tripPatterns = tripClient.planTripByIds(fromId, toId);
 
-            if (trips.isEmpty()) {
+            if (tripPatterns.isEmpty()) {
                 ctx.status(404).result("Ingen reiser funnet fra " + from + " til " + to);
             } else {
-                ctx.json(trips);
+                ctx.json(Map.of(
+                    "data", Map.of(
+                        "trip", Map.of(
+                            "tripPatterns", tripPatterns
+                        )
+                    )
+                ));
             }
         });
     } 
