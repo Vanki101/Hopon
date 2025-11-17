@@ -7,7 +7,7 @@
     >
       <div class="fav-info">
         <p class="fav-route">
-          {{ fav.from }} → {{ fav.to }}
+          {{ fav.fromLocation }} → {{ fav.toLocation }}
         </p>
         <p v-if="fav.createdAt" class="fav-meta">
           Lagret: {{ formatDate(fav.createdAt) }}

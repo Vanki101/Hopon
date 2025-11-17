@@ -159,42 +159,42 @@ const handleClearTo = () => {
   toSuggestions.value = []
 }
 
-// =============================
-// 🚌 HENT REISER FRA BACKEND
-// =============================
 const handleTripSearch = async () => {
-  if (!from.value || !to.value) return
+  if (!from.value || !to.value) return;
 
-  isSearching.value = true
-  error.value = ''
-  lastSavedMessage.value = ''
-  trips.value = []
+  isSearching.value = true;
+  error.value = "";
+  lastSavedMessage.value = "";
+  trips.value = [];
 
   try {
-    const res = await api.planTrip(from.value, to.value)
+    const res = await api.planTrip(from.value, to.value);
 
-    const rawTrips = Array.isArray(res)
-      ? res
-      : (res.trips ?? [])
+    // viktig: hent ut tripPatterns fra backend
+    const patterns = res?.data?.trip?.tripPatterns ?? [];
 
-    trips.value = rawTrips.map((t, index) => ({
-      id: t.id ?? String(index),
-      line: t.line ?? t.route ?? '—',
-      from: t.from ?? t.origin ?? from.value,
-      to: t.to ?? t.destination ?? to.value,
-      departureTime: t.departureTime ?? t.departure ?? '–:–',
-      arrivalTime: t.arrivalTime ?? t.arrival ?? '–:–',
-      duration: t.duration ?? t.travelMinutes ?? 0,
-      price: t.price ?? t.fare ?? null,
-    }))
+    trips.value = patterns.map((p, index) => {
+      const firstLeg = p.legs[0];
+      const lastLeg = p.legs[p.legs.length - 1];
+
+      return {
+        id: index,
+        from: firstLeg.fromPlace.name,
+        to: lastLeg.toPlace.name,
+        departureTime: firstLeg.expectedStartTime,
+        arrivalTime: lastLeg.expectedEndTime,
+        duration: Math.round(p.duration / 60),
+        price: null // entur gir ikke pris
+      };
+    });
 
   } catch (e) {
-    console.error(e)
-    error.value = 'Kunne ikke hente reiser. Prøv igjen senere.'
+    console.error(e);
+    error.value = "Kunne ikke hente reiser. Prøv igjen senere.";
   } finally {
-    isSearching.value = false
+    isSearching.value = false;
   }
-}
+};
 
 // =============================
 // ⭐ LAGRE FAVORITT

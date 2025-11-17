@@ -1,12 +1,12 @@
 // src/api/backend.js
 
-const BASE_URL = ''; // samme som backend
+const BASE_URL = 'http://localhost:8080'; // samme som backend
 
 export const api = {
   // Søk etter stoppesteder (brukes til forslag i SearchBar om du vil)
   async searchStops(name) {
     const response = await fetch(
-      `${BASE_URL}/search?name=${encodeURIComponent(name)}`
+      `http://localhost:8080/search?name=${encodeURIComponent(name)}`
     );
     if (!response.ok) throw new Error('Søk etter stoppesteder feilet');
     return response.json();
