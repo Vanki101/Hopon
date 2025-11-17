@@ -3,7 +3,6 @@
     <!-- Enkel navigasjon for testing -->
     <nav class="navbar">
       <router-link to="/">Hjem</router-link>
-      <router-link to="/search">Søk</router-link>
       <router-link to="/trip">Reiser</router-link>
       <router-link to="/tickets">Billetter</router-link>
       <router-link to="/settings">Innstillinger</router-link>
