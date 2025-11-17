@@ -8,6 +8,8 @@ import com.hopon.adapter.entur.EnturTripClient;
 import com.hopon.core.service.DepartureService;
 import com.hopon.adapter.entur.EnturClient;
 import com.hopon.adapter.entur.EnturLocationClient;
+import com.hopon.adapter.database.MySqlFavoriteTripRepository;
+import com.hopon.core.model.FavoriteTrip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Map;
@@ -37,6 +39,12 @@ public class App {
         var departureService = new DepartureService(enturClient);
         var locationClient = new EnturLocationClient();
         var tripClient = new EnturTripClient();
+        
+        // Database konfigurasjon
+        String dbUrl = "jdbc:mysql://localhost:3306/hopon?useSSL=false&serverTimezone=UTC";
+        String dbUser = "root";
+        String dbPassword = "Bacman124A";
+        var favoriteRepo = new MySqlFavoriteTripRepository(dbUrl, dbUser, dbPassword);
 
         // ---- Health check ----
         app.get("/health", ctx -> ctx.result("OK"));
@@ -118,6 +126,45 @@ public class App {
                         )
                     )
                 ));
+            }
+        });
+
+        // ---- Favoritter ----
+        // Hent alle favoritter
+        app.get("/favorites", ctx -> {
+            var favorites = favoriteRepo.findAll();
+            ctx.json(Map.of("value", favorites, "Count", favorites.size()));
+        });
+
+        // Lagre ny favoritt
+        app.post("/favorites", ctx -> {
+            String from = ctx.queryParam("from");
+            String to = ctx.queryParam("to");
+            
+            if (from == null || to == null) {
+                ctx.status(400).result("Query params 'from' and 'to' are required");
+                return;
+            }
+            
+            FavoriteTrip trip = new FavoriteTrip(from, to);
+            FavoriteTrip saved = favoriteRepo.save(trip);
+            
+            if (saved != null) {
+                ctx.status(201).json(saved);
+            } else {
+                ctx.status(500).result("Failed to save favorite");
+            }
+        });
+
+        // Slett favoritt
+        app.delete("/favorites/:id", ctx -> {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            boolean deleted = favoriteRepo.delete(id);
+            
+            if (deleted) {
+                ctx.status(204);
+            } else {
+                ctx.status(404).result("Favorite not found");
             }
         });
     } 
