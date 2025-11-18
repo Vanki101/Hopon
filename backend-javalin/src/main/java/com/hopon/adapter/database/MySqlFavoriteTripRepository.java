@@ -1,12 +1,18 @@
-package com.hopon.core.repository;
+package com.hopon.adapter.database;
 
-import com.hopon.core.model.FavoriteTrip;
-import com.hopon.core.ports.FavoriteTripRepository;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.hopon.core.model.FavoriteTrip;
+import com.hopon.core.ports.FavoriteTripRepository;
 
 public class MySqlFavoriteTripRepository implements FavoriteTripRepository {
 
@@ -81,7 +87,7 @@ public class MySqlFavoriteTripRepository implements FavoriteTripRepository {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return new Favorites(
+                    return new FavoriteTrip(
                             rs.getInt("id"),
                             rs.getString("from_location"),
                             rs.getString("to_location"),

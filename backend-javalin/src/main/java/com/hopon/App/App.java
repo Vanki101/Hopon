@@ -1,18 +1,21 @@
 package com.hopon.app;
 
-import io.javalin.Javalin;
-import io.javalin.json.JavalinJackson;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.hopon.adapter.entur.EnturTripClient; 
-import com.hopon.core.service.DepartureService;
-import com.hopon.adapter.entur.EnturClient;
-import com.hopon.adapter.entur.EnturLocationClient;
-import com.hopon.adapter.database.MySqlFavoriteTripRepository;
-import com.hopon.core.model.FavoriteTrip;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hopon.adapter.database.MySqlFavoriteTripRepository;
+import com.hopon.adapter.entur.EnturClient;
+import com.hopon.adapter.entur.EnturLocationClient;
+import com.hopon.adapter.entur.EnturTripClient;
+import com.hopon.core.model.FavoriteTrip;
+import com.hopon.core.service.DepartureService;
+
+import io.javalin.Javalin;
+import io.javalin.json.JavalinJackson;
 
 public class App {
 
@@ -157,7 +160,7 @@ public class App {
         });
 
         // Slett favoritt
-        app.delete("/favorites/:id", ctx -> {
+        app.delete("/favorites/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             boolean deleted = favoriteRepo.delete(id);
             
