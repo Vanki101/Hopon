@@ -19,7 +19,7 @@
         :placeholder="placeholder"
         :value="modelValue"
         @input="handleInput"
-        @focus="isFocused = true"
+        @focus="handleFocus"
         @blur="handleBlur"
         :aria-label="placeholder || 'Søk etter reiser'"
         :disabled="isLoading"
@@ -31,6 +31,7 @@
         @click="clearSearch"
         class="clear-button"
         aria-label="Tøm søkefelt"
+        type="button"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="20" height="20">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -43,32 +44,36 @@
       </div>
     </div>
 
-    <!-- Forslag -->
-    <div 
-      v-if="showSuggestions && suggestions.length > 0" 
-      class="suggestions-dropdown component-card"
-    >
-      <ul role="listbox">
-        <li
-          v-for="(suggestion, index) in suggestions"
-          :key="index"
-          @click="selectSuggestion(suggestion)"
-          :class="{ 'active': index === selectedIndex }"
-          tabindex="0"
-          class="suggestion-item"
-        >
-          <span class="suggestion-icon">📍</span>
-          <span class="suggestion-text">{{ suggestion }}</span>
-        </li>
-      </ul>
-    </div>
+    <!-- Forslag dropdown -->
+    <Transition name="dropdown">
+      <div 
+        v-if="showSuggestions && suggestions.length > 0" 
+        class="suggestions-dropdown"
+        @mouseenter="isMouseOverSuggestions = true"
+        @mouseleave="isMouseOverSuggestions = false"
+      >
+        <ul role="listbox">
+          <li
+            v-for="(suggestion, index) in suggestions"
+            :key="index"
+            @mousedown.prevent="selectSuggestion(suggestion)"
+            :class="{ 'active': index === selectedIndex }"
+            tabindex="0"
+            class="suggestion-item"
+            role="option"
+          >
+            <span class="suggestion-icon">📍</span>
+            <span class="suggestion-text">{{ suggestion }}</span>
+          </li>
+        </ul>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 
-// Props
 const props = defineProps({
   modelValue: String,
   placeholder: String,
@@ -77,12 +82,11 @@ const props = defineProps({
   debounceMs: { type: Number, default: 300 }
 })
 
-// Emits
 const emit = defineEmits([
   'update:modelValue',
   'search',
   'clear',
-  'select'   // ⭐ viktig for navigasjon
+  'select'
 ])
 
 // State
@@ -90,6 +94,7 @@ const searchInput = ref(null)
 const isFocused = ref(false)
 const showSuggestions = ref(false)
 const selectedIndex = ref(-1)
+const isMouseOverSuggestions = ref(false)
 let debounceTimeout = null
 
 // INPUT + debounce
@@ -99,17 +104,37 @@ const handleInput = (event) => {
   selectedIndex.value = -1
 
   clearTimeout(debounceTimeout)
+  
+  if (!value.trim()) {
+    showSuggestions.value = false
+    return
+  }
+
+  // Vis dropdown med en gang hvis vi fortsatt skriver
+  if (props.suggestions.length > 0) {
+    showSuggestions.value = true
+  }
+
   debounceTimeout = setTimeout(() => {
     emit('search', value)
-    showSuggestions.value = true
   }, props.debounceMs)
 }
 
-// Velge forslag (brukes ved klikk + enter)
+// Focus handler
+const handleFocus = () => {
+  isFocused.value = true
+  if (props.modelValue && props.suggestions.length > 0) {
+    showSuggestions.value = true
+  }
+}
+
+// Velge forslag
 const selectSuggestion = (suggestion) => {
   emit('update:modelValue', suggestion)
-  emit('select', suggestion)  // ⭐ sender signal til parent
+  emit('select', suggestion)
   showSuggestions.value = false
+  selectedIndex.value = -1
+  searchInput.value?.blur()
 }
 
 // Clear
@@ -124,7 +149,8 @@ const clearSearch = () => {
 // Klikk utenfor → lukk
 const closeIfClickedOutside = (e) => {
   if (!searchInput.value) return
-  if (!searchInput.value.parentNode.contains(e.target)) {
+  const container = searchInput.value.closest('.search-bar-container')
+  if (container && !container.contains(e.target)) {
     showSuggestions.value = false
   }
 }
@@ -135,37 +161,53 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', closeIfClickedOutside)
+  clearTimeout(debounceTimeout)
 })
 
 // Tastaturnavigasjon
 const handleKeydown = (e) => {
-  if (!showSuggestions.value) return
+  if (!showSuggestions.value || props.suggestions.length === 0) return
 
   if (e.key === 'ArrowDown') {
+    e.preventDefault()
     selectedIndex.value = Math.min(selectedIndex.value + 1, props.suggestions.length - 1)
   }
   if (e.key === 'ArrowUp') {
+    e.preventDefault()
     selectedIndex.value = Math.max(selectedIndex.value - 1, 0)
   }
   if (e.key === 'Enter' && selectedIndex.value >= 0) {
+    e.preventDefault()
     selectSuggestion(props.suggestions[selectedIndex.value])
   }
   if (e.key === 'Escape') {
     showSuggestions.value = false
+    searchInput.value?.blur()
   }
 }
 
-// Blur delay (så man kan klikke forslag)
+// Forbedret Blur-håndtering
 const handleBlur = () => {
   setTimeout(() => {
-    isFocused.value = false
-    showSuggestions.value = false
-  }, 200)
+    if (!isMouseOverSuggestions.value) {
+      isFocused.value = false
+      showSuggestions.value = false
+    }
+  }, 150)
 }
 
-// Hvis input tømmes → skjul dropdown
+// Watch modelValue
 watch(() => props.modelValue, (newVal) => {
-  if (!newVal) {
+  if (!newVal || newVal.trim() === '') {
+    showSuggestions.value = false
+  }
+})
+
+// Auto-vis dropdown når suggestions kommer
+watch(() => props.suggestions, (newSuggestions) => {
+  if (newSuggestions && newSuggestions.length > 0 && props.modelValue && isFocused.value) {
+    showSuggestions.value = true
+  } else if (!newSuggestions || newSuggestions.length === 0) {
     showSuggestions.value = false
   }
 })
@@ -175,7 +217,6 @@ watch(() => props.modelValue, (newVal) => {
 .search-bar-container {
   position: relative;
   width: 100%;
-  max-width: 600px;
   margin: 0 auto;
 }
 
@@ -183,24 +224,51 @@ watch(() => props.modelValue, (newVal) => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
+  padding: 14px 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.search-bar:focus-within {
+  border-color: #cf7012;
+  box-shadow: 0 4px 12px rgba(207, 112, 18, 0.15);
 }
 
 .search-icon {
-  color: var(--color-secondary);
+  color: #666;
+  display: flex;
+  align-items: center;
 }
 
 .search-input {
   flex: 1;
   border: none;
+  outline: none;
   font-size: 1rem;
+  color: #222;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #999;
 }
 
 .clear-button {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--color-secondary);
+  color: #999;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.clear-button:hover {
+  color: #cf7012;
 }
 
 .loading-indicator {
@@ -209,39 +277,99 @@ watch(() => props.modelValue, (newVal) => {
 }
 
 .mini-spinner {
-  border: 2px solid #ddd;
-  border-top: 2px solid var(--color-primary);
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #cf7012;
   border-radius: 50%;
   width: 18px;
   height: 18px;
   animation: spin 0.8s linear infinite;
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .suggestions-dropdown {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
-  max-height: 260px;
+  max-height: 300px;
   overflow-y: auto;
-  z-index: 10;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  border: 1px solid #e5e5e5;
+}
+
+.suggestions-dropdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .suggestion-item {
   display: flex;
   align-items: center;
-  padding: 10px 14px;
+  padding: 12px 16px;
   cursor: pointer;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #f5f5f5;
+  transition: all 0.15s ease;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
 }
 
 .suggestion-item:hover,
 .suggestion-item.active {
-  background-color: #f3f3f3;
+  background-color: #fff3eb;
 }
 
 .suggestion-icon {
   font-size: 1.2rem;
-  margin-right: 8px;
+  margin-right: 12px;
+}
+
+.suggestion-text {
+  color: #222;
+  font-size: 0.95rem;
+}
+
+/* Dropdown animation */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s ease;
+}
+
+.dropdown-enter-from {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+/* Scrollbar styling */
+.suggestions-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.suggestions-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.suggestions-dropdown::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.suggestions-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #999;
 }
 </style>

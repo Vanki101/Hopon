@@ -2,77 +2,108 @@
   <section class="search-home">
     <!-- HEADER -->
     <header class="home-header">
-      <div class="header-card">
-        <h1 class="app-title">HopOn Transport</h1>
-        <p class="app-subtitle">Planlegg reisen din enkelt, raskt og pålitelig</p>
-      </div>
+      <h1 class="app-title">🚌 HopOn Transport</h1>
+      <p class="app-subtitle">Planlegg reisen din enkelt, raskt og pålitelig</p>
     </header>
 
     <main class="search-main">
-
-      <!-- 🔍 SØK-SKJEMA -->
+      <!-- SØK-SKJEMA -->
       <section class="search-form">
+        <div class="search-inputs">
+          <!-- FRA -->
+          <SearchBar
+            v-model="from"
+            placeholder="Fra: f.eks. Halden stasjon"
+            :suggestions="fromSuggestions"
+            :isLoading="isLoadingFrom"
+            @search="handleFromSearch"
+            @clear="handleClearFrom"
+          />
 
-        <!-- FRA -->
-        <SearchBar
-          v-model="from"
-          placeholder="Fra: f.eks. Halden stasjon"
-          :suggestions="fromSuggestions"
-          :isLoading="isLoadingFrom"
-          @search="handleFromSearch"
-          @clear="handleClearFrom"
-        />
+          <!-- TIL -->
+          <SearchBar
+            v-model="to"
+            placeholder="Til: f.eks. Sarpsborg bussterminal"
+            :suggestions="toSuggestions"
+            :isLoading="isLoadingTo"
+            @search="handleToSearch"
+            @clear="handleClearTo"
+          />
+        </div>
 
-        <!-- TIL -->
-        <SearchBar
-          v-model="to"
-          placeholder="Til: f.eks. Sarpsborg bussterminal"
-          :suggestions="toSuggestions"
-          :isLoading="isLoadingTo"
-          @search="handleToSearch"
-          @clear="handleClearTo"
-        />
-
-        <!-- 🔎 SØK-KNAPP -->
+        <!-- SØK-KNAPP -->
         <button
           class="search-btn"
           :disabled="!from || !to || isSearching"
           @click="handleTripSearch"
         >
-          {{ isSearching ? 'Søker…' : 'Søk reise' }}
+          <span v-if="!isSearching">🔎 Søk reise</span>
+          <span v-else>
+            <span class="btn-spinner"></span>
+            Søker…
+          </span>
         </button>
 
         <!-- MELDINGER -->
-        <p v-if="error" class="error-text">{{ error }}</p>
-        <p v-if="lastSavedMessage" class="info-text">{{ lastSavedMessage }}</p>
+        <Transition name="fade">
+          <div v-if="error" class="message error-message">
+            <span class="message-icon">⚠️</span>
+            {{ error }}
+          </div>
+        </Transition>
+
+        <Transition name="fade">
+          <div v-if="lastSavedMessage" class="message success-message">
+            <span class="message-icon">✓</span>
+            {{ lastSavedMessage }}
+          </div>
+        </Transition>
       </section>
 
-      <!-- 🚌 RESULTATER -->
-      <section v-if="trips.length" class="results">
-        <div class="results-header">
-          <h2>Reiseforslag</h2>
+      <!-- RESULTATER -->
+      <Transition name="slide-up">
+        <section v-if="trips.length" class="results">
+          <div class="results-header">
+            <h2>
+              <span class="results-icon">🚌</span>
+              Reiseforslag
+            </h2>
 
-          <button class="fav-btn" @click="handleSaveFavorite">
-            ⭐ Lagre dette søket
-          </button>
-        </div>
+            <button class="fav-btn" @click="handleSaveFavorite">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+              </svg>
+              Lagre favoritt
+            </button>
+          </div>
 
-        <TripList
-          :trips="trips"
-          @select="handleSelectTrip"
-        />
-      </section>
+          <TripList
+            :trips="trips"
+            @select="handleSelectTrip"
+          />
+        </section>
+      </Transition>
 
-      <!-- 😕 INGEN REISER -->
-      <section v-else-if="!isSearching && from && to" class="empty-state">
-        <p>😕 Fant ingen reiser mellom {{ from }} og {{ to }}.</p>
-      </section>
+      <!-- INGEN REISER -->
+      <Transition name="fade">
+        <section v-if="!isSearching && from && to && trips.length === 0" class="empty-state">
+          <div class="empty-content">
+            <span class="empty-icon">😕</span>
+            <p>Fant ingen reiser mellom <strong>{{ from }}</strong> og <strong>{{ to }}</strong>.</p>
+            <p class="empty-hint">Prøv å søke på ulike stedsnavn eller stasjoner.</p>
+          </div>
+        </section>
+      </Transition>
 
-      <!-- ℹ️ VEILEDNING -->
-      <section v-else-if="!from && !to" class="info-state">
-        <p>💡 Start med å skrive inn avreisested og destinasjon.</p>
-      </section>
-
+      <!-- VEILEDNING -->
+      <Transition name="fade">
+        <section v-if="!from && !to && !isSearching" class="info-state">
+          <div class="info-content">
+            <span class="info-icon">💡</span>
+            <p>Start med å skrive inn avreisested og destinasjon.</p>
+          </div>
+        </section>
+      </Transition>
     </main>
   </section>
 </template>
@@ -107,10 +138,7 @@ const toSuggestions = ref([])
 if (route.query.from) from.value = String(route.query.from)
 if (route.query.to) to.value = String(route.query.to)
 
-
-// =============================
-// 🔍 HENT SØKEFORSLAG – FRA
-// =============================
+// HENT SØKEFORSLAG – FRA
 const handleFromSearch = async (query) => {
   from.value = query
   if (!query) return fromSuggestions.value = []
@@ -128,9 +156,7 @@ const handleFromSearch = async (query) => {
   }
 }
 
-// =============================
-// 🔍 HENT SØKEFORSLAG – TIL
-// =============================
+// HENT SØKEFORSLAG – TIL
 const handleToSearch = async (query) => {
   to.value = query
   if (!query) return toSuggestions.value = []
@@ -160,64 +186,100 @@ const handleClearTo = () => {
 }
 
 const handleTripSearch = async () => {
-  if (!from.value || !to.value) return;
+  if (!from.value || !to.value) return
 
-  isSearching.value = true;
-  error.value = "";
-  lastSavedMessage.value = "";
-  trips.value = [];
+  isSearching.value = true
+  error.value = ""
+  lastSavedMessage.value = ""
+  trips.value = []
 
   try {
-    const res = await api.planTrip(from.value, to.value);
-
-    // viktig: hent ut tripPatterns fra backend
-    const patterns = res?.data?.trip?.tripPatterns ?? [];
+    const res = await api.planTrip(from.value, to.value)
+    const patterns = res?.data?.trip?.tripPatterns ?? []
 
     trips.value = patterns.map((p, index) => {
-      const firstLeg = p.legs[0];
-      const lastLeg = p.legs[p.legs.length - 1];
+      const firstLeg = p.legs[0]
+      const lastLeg = p.legs[p.legs.length - 1]
+
+      // Samle alle legs (etapper) med stopp-informasjon
+      const legs = p.legs.map(leg => ({
+        mode: leg.mode,
+        line: leg.line?.publicCode || null,
+        fromPlace: leg.fromPlace.name,
+        toPlace: leg.toPlace.name,
+        fromQuay: leg.fromPlace.quay?.publicCode || null,
+        toQuay: leg.toPlace.quay?.publicCode || null,
+        departureTime: new Date(leg.expectedStartTime).toLocaleTimeString('no-NO', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        arrivalTime: new Date(leg.expectedEndTime).toLocaleTimeString('no-NO', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        duration: Math.round(leg.duration / 60),
+        distance: leg.distance
+      }))
 
       return {
         id: index,
         from: firstLeg.fromPlace.name,
         to: lastLeg.toPlace.name,
-        departureTime: firstLeg.expectedStartTime,
-        arrivalTime: lastLeg.expectedEndTime,
+        line: firstLeg.line?.publicCode || 'N/A',
+        departureTime: new Date(firstLeg.expectedStartTime).toLocaleTimeString('no-NO', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        arrivalTime: new Date(lastLeg.expectedEndTime).toLocaleTimeString('no-NO', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
         duration: Math.round(p.duration / 60),
-        price: null // entur gir ikke pris
-      };
-    });
+        price: null,
+        legs: legs, // ⭐ Alle etapper med stopp
+        walkDistance: Math.round(p.walkDistance || 0)
+      }
+    })
+
+    if (trips.value.length === 0) {
+      error.value = "Ingen reiser funnet for denne ruten."
+    }
 
   } catch (e) {
-    console.error(e);
-    error.value = "Kunne ikke hente reiser. Prøv igjen senere.";
+    console.error(e)
+    error.value = "Kunne ikke hente reiser. Prøv igjen senere."
   } finally {
-    isSearching.value = false;
+    isSearching.value = false
   }
-};
+}
 
-// =============================
-// ⭐ LAGRE FAVORITT
-// =============================
+// LAGRE FAVORITT
 const handleSaveFavorite = async () => {
   if (!from.value || !to.value) return
 
   try {
     await api.saveFavorite(from.value, to.value)
-    lastSavedMessage.value = `Favoritt lagret: ${from.value} → ${to.value} ✔️`
+    lastSavedMessage.value = `Favoritt lagret: ${from.value} → ${to.value}`
+    
+    // Fjern melding etter 3 sekunder
+    setTimeout(() => {
+      lastSavedMessage.value = ''
+    }, 3000)
   } catch (e) {
     console.error(e)
-    lastSavedMessage.value = 'Kunne ikke lagre favoritt 😕'
+    error.value = 'Kunne ikke lagre favoritt'
   }
 }
 
-// =============================
-// 👉 NAVIGER TIL TRIP-DETAILS
-// =============================
+// NAVIGER TIL TRIP-DETAILS
 const handleSelectTrip = (trip) => {
+  // Lagre trip data i localStorage
+  localStorage.setItem('selectedTrip', JSON.stringify(trip))
+  
+  // Naviger til trip view
   router.push({
     name: 'trip',
-    query: { ...trip }
+    query: { id: trip.id }
   })
 }
 </script>
@@ -230,24 +292,24 @@ const handleSelectTrip = (trip) => {
 }
 
 /* HEADER */
-.search-header {
+.home-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
-.search-header h1 {
-  font-size: 2.3rem;
+.app-title {
+  font-size: 2.5rem;
   font-weight: 700;
-  color: var(--color-primary);
-  margin-bottom: 8px;
+  color: #cf7012;
+  margin-bottom: 12px;
 }
 
-.search-header p {
-  color: #555;
-  font-size: 1rem;
+.app-subtitle {
+  color: #666;
+  font-size: 1.1rem;
 }
 
-/* SØKEFELT */
+/* SEARCH FORM */
 .search-main {
   display: flex;
   flex-direction: column;
@@ -256,68 +318,210 @@ const handleSelectTrip = (trip) => {
 
 .search-form {
   background: #fff;
-  padding: 24px;
-  border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.search-inputs {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
 .search-btn {
-  background: #cf7012;
+  background: linear-gradient(135deg, #cf7012 0%, #b85f15 100%);
   color: #fff;
   border: none;
-  padding: 12px 16px;
-  font-size: 1rem;
-  border-radius: 8px;
+  padding: 14px 20px;
+  font-size: 1.05rem;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(207, 112, 18, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .search-btn:hover:not(:disabled) {
-  background: #b55f15;
+  background: linear-gradient(135deg, #b85f15 0%, #a05413 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(207, 112, 18, 0.3);
 }
 
-.error-text {
-  color: #b00020;
-  font-size: 0.9rem;
-}
-.info-text {
-  color: #2ea3a3;
-  font-size: 0.9rem;
+.search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
-/* RESULTATER */
+.btn-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* MESSAGES */
+.message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  border-left: 4px solid #c33;
+}
+
+.success-message {
+  background: #eff;
+  color: #2a7;
+  border-left: 4px solid #2a7;
+}
+
+.message-icon {
+  font-size: 1.2rem;
+}
+
+/* RESULTS */
 .results {
   background: #fff;
-  padding: 24px;
-  border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .results-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.results-header h2 {
+  font-size: 1.5rem;
+  color: #222;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.results-icon {
+  font-size: 1.8rem;
 }
 
 .fav-btn {
-  background: #eee;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  background: #fff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 2px solid #cf7012;
+  color: #cf7012;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
 }
 
 .fav-btn:hover {
-  background: #ddd;
+  background: #cf7012;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(207, 112, 18, 0.2);
 }
 
+/* EMPTY STATE */
 .empty-state,
 .info-state {
+  background: #fff;
+  padding: 40px 28px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   text-align: center;
-  color: #666;
+}
+
+.empty-content,
+.info-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon,
+.info-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.empty-state p,
+.info-state p {
+  color: #555;
+  font-size: 1rem;
+  margin: 8px 0;
+}
+
+.empty-hint {
+  color: #999 !important;
+  font-size: 0.9rem !important;
+}
+
+/* ANIMATIONS */
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.slide-up-enter-active {
+  transition: all 0.4s ease;
+}
+
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .app-title {
+    font-size: 2rem;
+  }
+
+  .search-form {
+    padding: 20px;
+  }
+
+  .results-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fav-btn {
+    justify-content: center;
+  }
 }
 </style>
