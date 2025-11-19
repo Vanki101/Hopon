@@ -31,7 +31,7 @@
   <script setup>
   import { ref, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
-  import { api } from '../api/endpoints.js'
+  import { api } from '../api/backend.js'
   import FavoriteList from '../components/FavoriteList.vue'
   
   const router = useRouter()

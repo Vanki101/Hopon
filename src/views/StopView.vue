@@ -39,7 +39,7 @@
 <script setup>
 import { ref } from "vue";
 import SearchBar from "../components/SearchBar.vue";
-import { api } from "../api/endpoints.js";
+import { api } from "../api/backend.js";
 
 // STATE
 const stopName = ref("");

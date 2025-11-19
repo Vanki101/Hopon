@@ -54,12 +54,16 @@ public class App {
 
         // ---- Entur geocoder proxy ----
         app.get("/search", ctx -> {
+            System.out.println(">>> /search KALT!");
+
             if (!RequestValidator.requireQueryParam(ctx, "name")) return;
             var name = ctx.queryParam("name");
             var results = locationClient.findStopId(name);
             ctx.json(results);
         });
-
+        app.get("/debug", ctx -> {
+                ctx.result("DEBUG OK from HopOn backend");
+            });
         // ---- Departures ----
         app.get("/departures", ctx -> {
             if (!RequestValidator.validateNameOrId(ctx)) return;

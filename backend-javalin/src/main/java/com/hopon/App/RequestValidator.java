@@ -9,6 +9,7 @@ import io.javalin.http.Context;
  *Validerer innkommende HTTP-parametere.
  * Brukes i App.java for å holde rutene rene.
  */
+
 public class RequestValidator {
 
     private static final Logger log = LoggerFactory.getLogger(RequestValidator.class);
