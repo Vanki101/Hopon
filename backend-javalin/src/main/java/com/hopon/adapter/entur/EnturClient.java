@@ -1,7 +1,7 @@
 package com.hopon.adapter.entur;
 
-import com.hopon.Core.ports.DepartureFetcher;
-import com.hopon.Core.model.Departure;
+import com.hopon.core.ports.DepartureFetcher;
+import com.hopon.core.model.Departure;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,8 +19,9 @@ import java.util.List;
 
 public class EnturClient implements DepartureFetcher {
 
-    private static final Logger log = LoggerFactory.getLogger(EnturClient.class); // LOG:
+    private static final Logger log = LoggerFactory.getLogger(EnturClient.class);
     private static final String ENTUR_URL = "https://api.entur.io/journey-planner/v3/graphql";
+
     private final HttpClient client = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -28,7 +29,14 @@ public class EnturClient implements DepartureFetcher {
     public List<Departure> fetchDepartures(String stopPlaceId) {
         try {
             String query = String.format(
-                "{ stopPlace(id: \"%s\") { name estimatedCalls(timeRange: 7200, numberOfDepartures: 5) { expectedDepartureTime destinationDisplay { frontText } serviceJourney { line { publicCode } } } } }",
+                "{ stopPlace(id: \"%s\") { " +
+                "name " +
+                "estimatedCalls(timeRange: 7200, numberOfDepartures: 5) { " +
+                "expectedDepartureTime " +
+                "destinationDisplay { frontText } " +
+                "serviceJourney { " +
+                "line { publicCode transportMode } " +
+                "} } } }",
                 stopPlaceId
             );
 
@@ -41,16 +49,15 @@ public class EnturClient implements DepartureFetcher {
                     .POST(HttpRequest.BodyPublishers.ofString(body))
                     .build();
 
-            log.info("Fetching departures for stopPlaceId={}", stopPlaceId); // LOG:
+            log.info("Fetching departures for stopPlaceId={}", stopPlaceId);
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            log.debug("Entur API response: {}", response.body()); // LOG:
+            log.debug("Entur API response: {}", response.body());
 
             return parseDepartures(response.body());
 
         } catch (Exception e) {
-            log.error("Error while fetching Entur data for stopPlaceId={}: {}", stopPlaceId, e.getMessage(), e); // LOG:
+            log.error("Error while fetching Entur data for stopPlaceId={}: {}", stopPlaceId, e.getMessage(), e);
             return List.of();
         }
     }
@@ -63,36 +70,42 @@ public class EnturClient implements DepartureFetcher {
             JsonNode stopPlace = root.path("data").path("stopPlace");
 
             if (stopPlace.isMissingNode()) {
-                log.warn("No stopPlace found in Entur response"); // LOG:
+                log.warn("No stopPlace found in Entur response");
                 return departures;
             }
 
-            String fromName = stopPlace.path("name").asText("Ukjent sted");
+            String fromName = stopPlace.path("name").asText("Unknown location");
             JsonNode calls = stopPlace.path("estimatedCalls");
 
             if (!calls.isArray()) {
-                log.warn("No estimatedCalls list found in Entur response"); // LOG:
+                log.warn("No estimatedCalls list found in Entur response");
                 return departures;
             }
 
             for (JsonNode call : calls) {
-                String line = call.path("serviceJourney").path("line").path("publicCode").asText("");
-                String to = call.path("destinationDisplay").path("frontText").asText("");
-                String time = call.path("expectedDepartureTime").asText("");
+                JsonNode lineNode = call.path("serviceJourney").path("line");
 
-                if (line.isEmpty() || to.isEmpty() || time.isEmpty()) continue;
+                String line = lineNode.path("publicCode").asText("-");
+                String transportMode = lineNode.path("transportMode").asText("UNKNOWN");
+                String to = call.path("destinationDisplay").path("frontText").asText("Unknown destination");
+                String time = call.path("expectedDepartureTime").asText(null);
+
+                if (time == null || time.isBlank()) {
+                    log.warn("Missing expectedDepartureTime for line {} - skipping", line);
+                    continue;
+                }
 
                 LocalDateTime departureTime = OffsetDateTime.parse(time).toLocalDateTime();
-                departures.add(new Departure(fromName, to, line, departureTime));
+                Departure dep = new Departure(fromName, to, line, departureTime, transportMode);
+                departures.add(dep);
             }
 
             if (departures.isEmpty()) {
-                departures.add(new Departure("Ukjent", "Ingen avganger", "L0", LocalDateTime.now()));
-                log.info("No real departures – using fallback dummy data"); // LOG:
+                log.info("No departures found for stop");
             }
 
         } catch (Exception e) {
-            log.error("Error parsing Entur JSON response: {}", e.getMessage(), e); // LOG:
+            log.error("Error parsing Entur JSON response: {}", e.getMessage(), e);
         }
 
         return departures;
