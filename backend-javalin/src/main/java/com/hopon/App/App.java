@@ -1,4 +1,4 @@
-package com.hopon.app.App;
+package com.hopon.app;
 
 import java.util.Map;
 
