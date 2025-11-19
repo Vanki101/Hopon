@@ -21,7 +21,7 @@ public static boolean validateNameOrId(Context ctx) {
     String name = ctx.queryParam("name");
     String id = ctx.queryParam("id");
 
-        if ((name == null  name.isEmpty()) && (id == null  id.isEmpty())) {
+        if ((name == null || name.isEmpty()) && (id == null || id.isEmpty())) {
             log.warn("Missing query parameter 'name' or 'id'");
             ctx.status(400).result("Query parameter 'name' or 'id' is required");
             return false;
