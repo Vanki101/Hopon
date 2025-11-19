@@ -34,11 +34,13 @@ export const api = {
 
   // Lagre søk som favoritt i databasen (forutsetter at backend har POST /favorites)
   async saveFavorite(from, to) {
-    const response = await fetch(`${BASE_URL}/favorites`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to }),
-    });
+    
+    const response = await fetch(
+      `${BASE_URL}/favorites?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+      {
+        method: 'POST'
+      }
+    );
 
     if (!response.ok) throw new Error('Kunne ikke lagre favoritt');
     return response.json();
