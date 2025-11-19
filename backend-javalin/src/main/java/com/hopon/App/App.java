@@ -141,11 +141,12 @@ public class App {
 
         // Lagre ny favoritt
         app.post("/favorites", ctx -> {
+
             String from = ctx.queryParam("from");
             String to = ctx.queryParam("to");
-            
+
             if (from == null || to == null) {
-                ctx.status(400).result("Query params 'from' and 'to' are required");
+                ctx.status(400).result("----Query params 'from' and 'to' are required----");
                 return;
             }
             

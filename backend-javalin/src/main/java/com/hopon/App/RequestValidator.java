@@ -1,21 +1,22 @@
 package com.hopon.app;
 
-import io.javalin.http.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/
- 
-Validerer innkommende HTTP-parametere.
-Brukes i App.java for å holde rutene rene.*/
+import io.javalin.http.Context;
+
+/**
+ *Validerer innkommende HTTP-parametere.
+ * Brukes i App.java for å holde rutene rene.
+ */
 public class RequestValidator {
 
     private static final Logger log = LoggerFactory.getLogger(RequestValidator.class);
 
-    /
-     
-Sørger for at minst én av query-parametrene "name" eller "id" er satt.
-Returnerer true hvis gyldig, false hvis feiler (og setter HTTP-status + melding).*/
+    /**
+     * Sørger for at minst én av query-parametrene "name" eller "id" er satt.
+     * Returnerer true hvis gyldig, false hvis feiler (og setter HTTP-status + melding).
+     */
 public static boolean validateNameOrId(Context ctx) {
     String name = ctx.queryParam("name");
     String id = ctx.queryParam("id");
@@ -28,9 +29,9 @@ public static boolean validateNameOrId(Context ctx) {
         return true;
     }
 
-    /
-     
-Validerer at en gitt query-param ikke er tom.*/
+    /**
+     * Validerer at en gitt query-param ikke er tom.
+     */
   public static boolean requireQueryParam(Context ctx, String paramName) {
       String value = ctx.queryParam(paramName);
       if (value == null || value.isEmpty()) {
@@ -39,9 +40,9 @@ Validerer at en gitt query-param ikke er tom.*/
           return false;}
       return true;}
 
-    /
-     
-Validerer at request body ikke er tom (for POST-endepunkt).*/
+    /**
+     * Validerer at request body ikke er tom (for POST-endepunkt).
+     */
   public static boolean requireBody(Context ctx) {
       String body = ctx.body();
       if (body == null || body.isEmpty()) {
@@ -50,10 +51,10 @@ Validerer at request body ikke er tom (for POST-endepunkt).*/
           return false;}
       return true;}
 
-    /
-     
-Validerer at både 'from' og 'to' parametere er satt.
-Returnerer true hvis begge er gyldige, false hvis noen mangler.*/
+    /**     
+    * Validerer at både 'from' og 'to' parametere er satt.
+    * Returnerer true hvis begge er gyldige, false hvis noen mangler.
+    */
 public static boolean requireFromAndTo(Context ctx) {
     String from = ctx.queryParam("from");
     String to = ctx.queryParam("to");
@@ -66,10 +67,12 @@ public static boolean requireFromAndTo(Context ctx) {
         return true;
     }
 
-    /
-     
-Henter enten 'id' eller 'name' fra query params.
-Returnerer id hvis satt, ellers name.*/
+
+/**   
+* Henter enten 'id' eller 'name' fra query params.
+* Returnerer id hvis satt, ellers name.
+*/
+
 public static String getStopInput(Context ctx) {
     String id = ctx.queryParam("id");
     String name = ctx.queryParam("name");
