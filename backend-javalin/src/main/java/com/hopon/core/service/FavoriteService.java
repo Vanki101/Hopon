@@ -1,4 +1,4 @@
-package com.hopon.Core.service;
+/*package com.hopon.Core.service;
 
 import com.hopon.Core.ports.FavoriteRepository;
 import org.slf4j.Logger;
@@ -48,3 +48,4 @@ public class FavoriteService {
         }
     }
 }
+*/
