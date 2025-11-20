@@ -4,9 +4,9 @@ on:
   push:
     branches: [ "develop", "main" ]
     paths-ignore:
-        - "README.md"
-        - "docs/**"
-        - ".github/ISSUE_TEMPLATE/"
+      - "README.md"
+      - "docs/**"
+      - ".github/ISSUE_TEMPLATE/"
   pull_request:
     branches: [ "develop", "main" ]
 
@@ -17,8 +17,6 @@ permissions:
   security-events: write
   id-token: write
   pull-requests: write
-
-
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -38,7 +36,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      
+      - name: Debug - list files
+        run: |
+          pwd
+          ls -la
+          find . -maxdepth 6 -name pom.xml -print || true
+
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:
@@ -46,27 +49,25 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: maven
 
-
-      - name: Build & test
+      - name: Build & test (backend-javalin)
         run: mvn -B -ntp verify
+        working-directory: ./backend-javalin
 
-      
       - name: Publish JUnit test results
         if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           files: |
-            **/target/surefire-reports/*.xml
-            **/target/failsafe-reports/*.xml
+            backend-javalin/**/target/surefire-reports/*.xml
+            backend-javalin/**/target/failsafe-reports/*.xml
           check_name: JUnit Tests
 
-      
       - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: app-${{ matrix.java }}
           path: |
-            **/target/*.jar
-            !/-sources.jar
-            !**/-javadoc.jar
+            backend-javalin/**/target/*.jar
+            !**/*-sources.jar
+            !**/*-javadoc.jar
