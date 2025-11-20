@@ -1,8 +1,7 @@
-package com.hopon.App;
+package com.hopon.app;
 
 import kong.unirest.Unirest;
 import org.junit.jupiter.api.*;
-import com.hopon.App.App;
 
 public class AppIntegrationTest {
 

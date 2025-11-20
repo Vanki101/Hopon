@@ -6,7 +6,7 @@ export const api = {
   // Søk etter stoppesteder (brukes til forslag i SearchBar om du vil)
   async searchStops(name) {
     const response = await fetch(
-      `${BASE_URL}//search?name=${encodeURIComponent(name)}`
+      `${BASE_URL}/search?name=${encodeURIComponent(name)}`
     );
     if (!response.ok) throw new Error('Søk etter stoppesteder feilet');
     return response.json();

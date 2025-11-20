@@ -12,7 +12,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.hopon.App.App</mainClass>
+              <mainClass>com.hopon.app.App</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -30,7 +30,7 @@
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <transformers>
                 <transformer>
-                  <mainClass>com.hopon.App.App</mainClass>
+                  <mainClass>com.hopon.app.App</mainClass>
                 </transformer>
               </transformers>
             </configuration>

@@ -1,4 +1,4 @@
-package com.hopon.App;
+package com.hopon.app;
 
 import io.javalin.Javalin;
 import com.hopon.core.service.DepartureService;

@@ -1,4 +1,4 @@
-package com.hopon.App;
+package com.hopon.app;
 
 import kong.unirest.Unirest;
 import kong.unirest.HttpResponse;
