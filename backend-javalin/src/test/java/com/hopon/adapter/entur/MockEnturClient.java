@@ -10,6 +10,6 @@ import java.util.List;
 public class MockEnturClient implements DepartureFetcher {
     @Override
     public List<Departure> fetchDepartures(String stopPlaceId) {
-        return List.of(new Departure("Mock", "Test", "L0", LocalDateTime.now()));
+        return List.of(new Departure("Mock", "Test", "1", LocalDateTime.now(), "buss"));
     }
 }
