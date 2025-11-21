@@ -1,12 +1,10 @@
 package com.hopon.adapter.database;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,32 +12,24 @@ import java.util.List;
 import com.hopon.core.model.FavoriteTrip;
 import com.hopon.core.ports.FavoriteTripRepository;
 
-public class MySqlFavoriteTripRepository implements FavoriteTripRepository {
-
-    private final String url;
-    private final String user;
-    private final String password;
-
-    public MySqlFavoriteTripRepository(String url, String user, String password) {
-        this.url = url;
-        this.user = user;
-        this.password = password;
+public class FavoriteTripRepositorySqlite implements FavoriteTripRepository {
+    // Vi trenger ikke lenger url/user/password siden de er håndtert i Database-klassen
+    public FavoriteTripRepositorySqlite() {
     }
 
     @Override
     public FavoriteTrip save(FavoriteTrip trip) {
         String sql = "INSERT INTO favorites (from_location, to_location, created_at) VALUES (?, ?, ?)";
 
-        try (Connection conn = DriverManager.getConnection(url, user, password);
+        try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, trip.getFromLocation());
             stmt.setString(2, trip.getToLocation());
-            stmt.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            stmt.setString(3, LocalDateTime.now().toString());
 
             stmt.executeUpdate();
 
-            // Set generated ID back to the entity
             try (ResultSet keys = stmt.getGeneratedKeys()) {
                 if (keys.next()) {
                     trip.setId(keys.getInt(1));
@@ -57,7 +47,7 @@ public class MySqlFavoriteTripRepository implements FavoriteTripRepository {
         String sql = "SELECT id, from_location, to_location, created_at FROM favorites";
         List<FavoriteTrip> trips = new ArrayList<>();
 
-        try (Connection conn = DriverManager.getConnection(url, user, password);
+        try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -66,7 +56,7 @@ public class MySqlFavoriteTripRepository implements FavoriteTripRepository {
                         rs.getInt("id"),
                         rs.getString("from_location"),
                         rs.getString("to_location"),
-                        rs.getTimestamp("created_at").toLocalDateTime()
+                        LocalDateTime.parse(rs.getString("created_at"))
                 ));
             }
 
@@ -80,7 +70,7 @@ public class MySqlFavoriteTripRepository implements FavoriteTripRepository {
     public FavoriteTrip findById(int id) {
         String sql = "SELECT id, from_location, to_location, created_at FROM favorites WHERE id = ?";
 
-        try (Connection conn = DriverManager.getConnection(url, user, password);
+        try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
@@ -91,12 +81,12 @@ public class MySqlFavoriteTripRepository implements FavoriteTripRepository {
                             rs.getInt("id"),
                             rs.getString("from_location"),
                             rs.getString("to_location"),
-                            rs.getTimestamp("created_at").toLocalDateTime()
+                            LocalDateTime.parse(rs.getString("created_at"))
                     );
                 }
             }
-
             return null;
+
         } catch (SQLException e) {
             throw new RuntimeException("Failed to find favorite trip by id", e);
         }
@@ -106,7 +96,7 @@ public class MySqlFavoriteTripRepository implements FavoriteTripRepository {
     public boolean delete(int id) {
         String sql = "DELETE FROM favorites WHERE id = ?";
 
-        try (Connection conn = DriverManager.getConnection(url, user, password);
+        try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);

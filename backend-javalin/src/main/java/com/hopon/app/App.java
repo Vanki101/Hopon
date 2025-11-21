@@ -7,7 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.hopon.adapter.database.MySqlFavoriteTripRepository;
+import com.hopon.core.ports.FavoriteRepository;
+import com.hopon.adapter.database.FavoriteTripRepositorySqlite;
 import com.hopon.adapter.entur.EnturClient;
 import com.hopon.adapter.entur.EnturLocationClient;
 import com.hopon.adapter.entur.EnturTripClient;
@@ -43,11 +44,8 @@ public class App {
         var locationClient = new EnturLocationClient();
         var tripClient = new EnturTripClient();
         
-        // Database konfigurasjon
-        String dbUrl = "jdbc:mysql://localhost:3306/hopon?useSSL=false&serverTimezone=UTC";
-        String dbUser = "root";
-        String dbPassword = "Bacman124A";
-        var favoriteRepo = new MySqlFavoriteTripRepository(dbUrl, dbUser, dbPassword);
+        // Database - SQLite (lokal fil, ingen server kreves)
+        var favoriteRepo = new FavoriteTripRepositorySqlite();
 
         // ---- Health check ----
         app.get("/health", ctx -> ctx.result("OK"));

@@ -1,4 +1,4 @@
-package com.hopon.Core.ports;
+package com.hopon.core.ports;
 
 import java.util.List;
 

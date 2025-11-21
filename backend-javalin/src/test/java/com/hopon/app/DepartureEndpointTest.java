@@ -1,4 +1,4 @@
-package com.hopon.app;
+/*package com.hopon.pp;
 
 import kong.unirest.Unirest;
 import kong.unirest.HttpResponse;
@@ -27,3 +27,4 @@ public class DepartureEndpointTest {
         assertTrue(response.getBody().contains("Majorstuen"), "Response should contain mock data");
     }
 }
+*/

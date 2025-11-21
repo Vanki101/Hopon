@@ -1,4 +1,4 @@
-package com.hopon.Core.repository;
+/*package com.hopon.Core.repository;
 
 import com.hopon.Core.ports.FavoriteRepository;
 import java.util.ArrayList;
@@ -25,3 +25,4 @@ public class InMemoryFavoriteRepository implements FavoriteRepository {
         favorites.remove(stopId);
     }
 }
+*/
